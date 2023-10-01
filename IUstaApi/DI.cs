@@ -2,6 +2,9 @@
 using IUstaApi.Auth;
 using IUstaApi.Data;
 using IUstaApi.Models.Entities;
+using IUstaApi.Providers;
+using IUstaApi.Services.Concrete;
+using IUstaApi.Services.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -104,9 +107,9 @@ public static class DI
             if (!result.Succeeded) throw new Exception(result.Errors.First().Description);
 
         }        
-        if (!await roleManager.RoleExistsAsync("master"))
+        if (!await roleManager.RoleExistsAsync("worker"))
         {
-            var result = await roleManager.CreateAsync(new IdentityRole("master"));
+            var result = await roleManager.CreateAsync(new IdentityRole("worker"));
             if (!result.Succeeded) throw new Exception(result.Errors.First().Description);
 
         }
@@ -132,13 +135,16 @@ public static class DI
         }
         return services;
     }
-    //public static IServiceCollection AddDomainServices(this IServiceCollection services)
-    //{
-    //    services.AddScoped<ITodoService, TodoService>();
-    //    services.AddScoped<IMailService, MailService>();
-    //    services.AddHostedService<NotifyUserService>();
-    //    return services;
-    //}
+    public static IServiceCollection AddDomainServices(this IServiceCollection services)
+    {
+        services.AddScoped<IRequestUserProvider, RequestUserProvider>();
+        services.AddScoped<IRatingService, RatingService>();
+        services.AddScoped<ICustomerService, CustomerService>();
+        services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<IWorkerService, WorkerService>();
+        //services.AddHostedService<NotifyUserService>();
+        return services;
+    }
 
 
     //public static IServiceCollection AddLoggingPath(this IServiceCollection services, IConfiguration configuration)

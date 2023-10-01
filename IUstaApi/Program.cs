@@ -6,13 +6,15 @@ using Serilog;
 using IUstaApi.Data;
 using IUstaApi.Models.Entities;
 using Microsoft.AspNetCore.Identity;
+using IUstaApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-//builder.Services.AddDomainServices();
+//builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddDomainServices();
 
 //loglamada bax
 //builder.Services.AddLoggingPath(builder.Configuration);

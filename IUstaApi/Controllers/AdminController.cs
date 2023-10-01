@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using IUstaApi.Models.DTOs.Auth;
+using IUstaApi.Models;
+using IUstaApi.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using IUstaApi.Models.DTOs.Category;
 
 namespace IUstaApi.Controllers
 {
@@ -9,5 +13,26 @@ namespace IUstaApi.Controllers
     [Authorize(Roles = "admin")]
     public class AdminController : ControllerBase
     {
+        private readonly IAdminService _service;
+
+        public AdminController(IAdminService service)
+        {
+            _service = service;
+        }
+
+        [HttpPost("addCategory")]
+        public async Task<ActionResult<bool>> AddCategory([FromBody] CategoryDto model) => await _service.AddCategoryAsync(model);
+
+
+        [HttpGet("showAllCategories")]
+        public ActionResult<IEnumerable<CategoryInfoDto>> GetAllCategories() => Ok(_service.GetAllCategories());
+
+        [HttpPut("updateCategory")]
+        public async Task<ActionResult<bool>> UpdateCategory([FromBody] CategoryUpdateDto model) => await _service.UpdateCategoryAsync(model);
+
+
+
+        [HttpGet("getStatistics")]
+        public ActionResult<Statistics> GetStatistics() => _service.GetStatistics();
     }
 }
