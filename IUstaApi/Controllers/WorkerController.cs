@@ -22,7 +22,9 @@ namespace IUstaApi.Controllers
         public ActionResult<IEnumerable<CategoryInfoDto>> GetAllCategories() => Ok(_service.GetAllCategories());
         [HttpGet("ShowOwnCategories")]
         public ActionResult<IEnumerable<CategoryInfoDto>> GetOwnCategories() => Ok(_service.GetOwnCategories());
-        [HttpPost("JoinCategory")]
-        public async Task<ActionResult<bool>> JoinCategory([FromBody] string categoryId) => await _service.JoinToCategory(categoryId);
+        [HttpPost("JoinToCategory")]
+        public async Task<ActionResult<bool>> JoinToCategory([FromBody] string categoryId) => await _service.JoinToCategory(categoryId);        
+        [HttpDelete("LeaveFromCategory")]
+        public async Task<ActionResult<bool>> LeaveFromCategory([FromBody] string categoryId) => await _service.LeaveFromCategory(categoryId);
     }
 }

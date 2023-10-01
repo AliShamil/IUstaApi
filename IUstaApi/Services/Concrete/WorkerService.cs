@@ -22,13 +22,13 @@ namespace IUstaApi.Services.Concrete
             _service=service;
         }
 
-        public IEnumerable<CategoryInfoDto> GetAllCategories() => _context.Categories.Select(c => new CategoryInfoDto { Id = c.Id.ToString(), Name = c.Name});
+        public IEnumerable<CategoryInfoDto> GetAllCategories() => _context.Categories.Select(c => new CategoryInfoDto { Id = c.Id.ToString(), Name = c.Name });
 
 
-        public  IEnumerable<CategoryInfoDto> GetOwnCategories()
+        public IEnumerable<CategoryInfoDto> GetOwnCategories()
         {
-           var result = _service.GetAllCategoriesByWorkerId(_provider.GetUserInfo().id);
-           return result;
+            var result = _service.GetAllCategoriesByWorkerId(_provider.GetUserInfo().id);
+            return result;
         }
 
         public async Task<bool> JoinToCategory(string categoryId)
@@ -48,12 +48,23 @@ namespace IUstaApi.Services.Concrete
             {
                 return false;
             }
-          
+
         }
 
-        public Task<bool> LeaveFromCategory(string categoryId)
+        public async Task<bool> LeaveFromCategory(string categoryId)
         {
-            throw new NotImplementedException();
+            var wc = _context.WorkerCategories.FirstOrDefault(wc => wc.WorkerId == _provider.GetUserInfo().id && wc.CategoryId == Guid.Parse(categoryId));
+            if (wc == null)
+                return false;
+            try
+            {
+                await _service.RemoveAsync(wc.Id.ToString());
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public Task<bool> SendWorkRequest(WorkRequestDto request)

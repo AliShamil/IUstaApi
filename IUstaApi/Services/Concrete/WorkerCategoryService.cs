@@ -55,6 +55,18 @@ namespace IUstaApi.Services.Concrete
 
             return categoriesForWorker;
         }
-        
+
+        public async Task<bool> RemoveAsync(string id)
+        {
+            var wc = _context.WorkerCategories.FirstOrDefault(wc => wc.Id==Guid.Parse(id));
+           var result = _context.Remove(wc);
+            if (result.State == EntityState.Deleted)
+            {
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            else
+                return false;
+        }
     }
 }
