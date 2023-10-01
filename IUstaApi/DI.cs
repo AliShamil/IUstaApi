@@ -142,6 +142,7 @@ public static class DI
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<IWorkerService, WorkerService>();
+        services.AddScoped<IWorkerCategoryService, WorkerCategoryService>();
         //services.AddHostedService<NotifyUserService>();
         return services;
     }

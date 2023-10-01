@@ -28,6 +28,7 @@ namespace IUstaApi.Data
 
 
         public DbSet<Category> Categories { get; set; }
+        public DbSet<WorkerCategory> WorkerCategories { get; set; }
         public DbSet<WorkRequest> WorkRequests { get; set; }
     }
 }
