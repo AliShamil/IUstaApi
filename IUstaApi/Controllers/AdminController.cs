@@ -9,6 +9,7 @@ using Azure.Core;
 using IUstaApi.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using IUstaApi.Models.DTOs.Admin;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace IUstaApi.Controllers
 {
@@ -19,14 +20,14 @@ namespace IUstaApi.Controllers
     {
         private readonly IAdminService _service;
         private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public AdminController(IAdminService service, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<IdentityRole> roleManager)
+        private readonly IMemoryCache _memoryCache;
+        public AdminController(IAdminService service, UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IMemoryCache memoryCache)
         {
             _service = service;
             _userManager=userManager;
-            _signInManager=signInManager;
             _roleManager=roleManager;
+            _memoryCache=memoryCache;
         }
 
         [HttpPost("addCategory")]
@@ -82,12 +83,37 @@ namespace IUstaApi.Controllers
         [HttpGet("showAllCategories")]
         public ActionResult<IEnumerable<CategoryInfoDto>> GetAllCategories() => Ok(_service.GetAllCategories());
 
+        [HttpGet("showAllUsers")]
+        public ActionResult<IEnumerable<AppUserInfo>> GetAllUsers() => Ok(_service.GetAllUsers().Result);
+
+
         [HttpPut("updateCategory")]
         public async Task<ActionResult<bool>> UpdateCategory([FromBody] CategoryUpdateDto model) => await _service.UpdateCategoryAsync(model);
 
 
 
+        //[HttpGet("getStatistics")]
+        //public ActionResult<Statistics> GetStatistics() => _service.GetStatistics();
+
         [HttpGet("getStatistics")]
-        public ActionResult<Statistics> GetStatistics() => _service.GetStatistics();
+        public ActionResult<Statistics> GetStatistics()
+        {
+            if (_memoryCache.TryGetValue("Statistics", out Statistics cachedStatistics))
+            {
+                return Ok(cachedStatistics);
+            }
+
+            var statistics = _service.GetStatistics();
+
+            var cacheEntryOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
+            };
+
+            _memoryCache.Set("Statistics", statistics, cacheEntryOptions);
+
+            return Ok(statistics);
+        }
+
     }
 }

@@ -12,6 +12,7 @@ namespace IUstaApi.Services.Interface
         public Task<bool> UpdateCategoryAsync(CategoryUpdateDto model);
         public Task<bool> RemoveCategoryAsync(string categoryId);
         public IEnumerable<CategoryInfoDto> GetAllCategories();
+        public Task<IEnumerable<AppUserInfo>> GetAllUsers();
         public Statistics GetStatistics();
     }
 }

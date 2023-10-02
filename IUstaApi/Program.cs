@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDomainServices();
 builder.Services.AddEmailService(builder.Configuration);
-
+builder.Services.AddMemoryCache();
 builder.Services.AddLoggingPath(builder.Configuration);
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
@@ -24,6 +24,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<UstaDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("UstaDbConnectionString"));
+    
 });
 
 builder.Services.AddCors(options => options.AddPolicy(name: "NgOrigins",

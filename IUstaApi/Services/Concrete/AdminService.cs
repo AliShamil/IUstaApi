@@ -40,6 +40,30 @@ namespace IUstaApi.Services.Concrete
 
         public IEnumerable<CategoryInfoDto> GetAllCategories() => _context.Categories.Select(c => new CategoryInfoDto { Id = c.Id.ToString(), Name = c.Name });
 
+        public async Task<IEnumerable<AppUserInfo>> GetAllUsers()
+        {
+            // Retrieve all users from the context
+            var users = await _context.Users.ToListAsync();
+
+            // Retrieve roles for each user
+            var userRoles = new Dictionary<string, List<string>>();
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                userRoles[user.Id] = roles.ToList();
+            }
+
+            // Create AppUserInfo instances
+            var appUserInfos = users.Select(user => new AppUserInfo
+            {
+                Email = user.Email,
+                Roles = userRoles.ContainsKey(user.Id) ? userRoles[user.Id] : new List<string>()
+            }).ToList();
+
+            return appUserInfos;
+            // 'appUserInfos' now contains the desired AppUserInfo instances with roles
+
+        }
 
         public Statistics GetStatistics()
         {
