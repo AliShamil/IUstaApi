@@ -1,6 +1,6 @@
-﻿
-using Azure.Core;
+﻿using Azure.Core;
 using IUstaApi.Data;
+using IUstaApi.Mail;
 using IUstaApi.Models.DTOs;
 using IUstaApi.Models.DTOs.Category;
 using IUstaApi.Models.DTOs.Worker;
@@ -18,13 +18,15 @@ namespace IUstaApi.Services.Concrete
         private readonly IWorkerCategoryService _service;
         private readonly IRequestUserProvider _provider;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IMailService _mailService;
 
-        public WorkerService(UstaDbContext context, IRequestUserProvider provider, IWorkerCategoryService service, UserManager<AppUser> userManager)
+        public WorkerService(UstaDbContext context, IRequestUserProvider provider, IWorkerCategoryService service, UserManager<AppUser> userManager, IMailService mailService)
         {
             _context=context;
             _provider=provider;
             _service=service;
             _userManager=userManager;
+            _mailService=mailService;
         }
 
 
@@ -88,7 +90,7 @@ namespace IUstaApi.Services.Concrete
                     workRequest.IsAccepted = true;
                     _context.WorkRequests.Update(workRequest);
                     await _context.SaveChangesAsync();
-                    
+                    _mailService.SendTaskAcceptanceMessage(workRequest.ClientEmail, workRequest.WorkerEmail);
                     return true;
                 }
                 return false;

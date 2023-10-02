@@ -1,6 +1,8 @@
-﻿using Azure.Core;
+﻿
+using Azure.Core;
 using IUstaApi.Auth;
 using IUstaApi.Data;
+using IUstaApi.Mail;
 using IUstaApi.Models.Entities;
 using IUstaApi.Providers;
 using IUstaApi.Services.Concrete;
@@ -9,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Configuration;
 using System.Text;
 
 namespace IUstaApi;
@@ -143,20 +146,28 @@ public static class DI
         services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<IWorkerService, WorkerService>();
         services.AddScoped<IWorkerCategoryService, WorkerCategoryService>();
+
         //services.AddHostedService<NotifyUserService>();
         return services;
     }
 
+    public static IServiceCollection AddEmailService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddScoped<IMailService, MailService>();
+        var smtpConfig = new SMTPConfig();
+        configuration.GetSection("SMTP").Bind(smtpConfig);
+        services.AddSingleton(smtpConfig);
+        return services;
+    }
+        //public static IServiceCollection AddLoggingPath(this IServiceCollection services, IConfiguration configuration)
+        //{
+        //    var directoryInfo = new DirectoryInfo("logs");
+        //    var fullpath = directoryInfo.FullName;
+        //    string logFileName = "log.txt";
+        //    string logFilePath = Path.Combine(fullpath, logFileName);
 
-    //public static IServiceCollection AddLoggingPath(this IServiceCollection services, IConfiguration configuration)
-    //{
-    //    var directoryInfo = new DirectoryInfo("logs");
-    //    var fullpath = directoryInfo.FullName;
-    //    string logFileName = "log.txt";
-    //    string logFilePath = Path.Combine(fullpath, logFileName);
+        //    configuration["Serilog:WriteTo:1:Args:path"] = logFilePath;
 
-    //    configuration["Serilog:WriteTo:1:Args:path"] = logFilePath;
-
-    //    return services;
-    //}
-}
+        //    return services;
+        //}
+    }

@@ -10,11 +10,10 @@ using IUstaApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
-//builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddDomainServices();
+builder.Services.AddEmailService(builder.Configuration);
 
 //loglamada bax
 //builder.Services.AddLoggingPath(builder.Configuration);
