@@ -15,7 +15,6 @@
 
             var userId = _context.User.Claims.First(e => e.Type == "userId").Value;
             var username = _context.User.Identity!.Name!;
-
             return new UserInfo(userId, username);
         }
     }

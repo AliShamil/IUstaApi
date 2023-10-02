@@ -11,13 +11,13 @@ namespace IUstaApi.Services.Interface
         IEnumerable<CategoryInfoDto> GetAllCategories();
         IEnumerable<CategoryInfoDto> GetOwnCategories();
 
-        Task<ProfileDto?> GetWorkerProfile(string email);
+        Task<ProfileDto?> GetWorkerProfile();
         Task<bool> AcceptWorkAsync(AcceptWorkRequest request);
         Task<bool> RejectWorkAsync(RejectWorkRequest request);
         Task<bool> SetWorkDoneAsync(SetWorkDoneRequest requestId);
-        IEnumerable<RequestDto> SeeInactiveRequests(string email);
-        IEnumerable<RequestDto> SeeActiveRequests(string email);
-        IEnumerable<RequestDto> SeeCompletedTasks(string email);
+        IEnumerable<RequestDto> SeeInactiveRequests();
+        IEnumerable<RequestDto> SeeActiveRequests();
+        IEnumerable<RequestDto> SeeCompletedTasks();
     }
 
 }

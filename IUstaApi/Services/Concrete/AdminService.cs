@@ -1,9 +1,11 @@
 ﻿using IUstaApi.Data;
 using IUstaApi.Models;
+using IUstaApi.Models.DTOs.Admin;
 using IUstaApi.Models.DTOs.Auth;
 using IUstaApi.Models.DTOs.Category;
 using IUstaApi.Models.Entities;
 using IUstaApi.Services.Interface;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace IUstaApi.Services.Concrete
@@ -11,17 +13,19 @@ namespace IUstaApi.Services.Concrete
     public class AdminService : IAdminService
     {
         private readonly UstaDbContext _context;
-
-        public AdminService(UstaDbContext context)
+        private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public AdminService(UstaDbContext context, UserManager<AppUser> userManager)
         {
             _context=context;
+            _userManager=userManager;
         }
 
         public async Task<bool> AddCategoryAsync(CategoryDto model)
         {
             try
             {
-                var category = new Category { Id = Guid.NewGuid(), Name = model.Name, Description = model.Description,CreatedTime=DateTime.Now };
+                var category = new Category { Id = Guid.NewGuid(), Name = model.Name, Description = model.Description, CreatedTime=DateTime.Now };
                 await _context.AddAsync(category);
                 await _context.SaveChangesAsync();
 
@@ -64,7 +68,7 @@ namespace IUstaApi.Services.Concrete
             {
                 var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id==Guid.Parse(categoryId));
                 _context.Categories.Remove(category);
-                
+
                 await _context.SaveChangesAsync();
 
                 return true;
@@ -75,11 +79,24 @@ namespace IUstaApi.Services.Concrete
             }
         }
 
+        public async Task<bool> RemoveUser(RemoveUserDto model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return false;
+            if(await _userManager.IsInRoleAsync(user, "admin"))
+                return false;
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> UpdateCategoryAsync(CategoryUpdateDto model)
         {
             try
             {
-                var category = await _context.Categories.FirstOrDefaultAsync(c=>c.Id == Guid.Parse(model.Id));
+                var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == Guid.Parse(model.Id));
 
                 if (category == null)
                     return false;

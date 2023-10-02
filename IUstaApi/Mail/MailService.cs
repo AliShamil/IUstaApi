@@ -32,7 +32,7 @@ namespace IUstaApi.Mail
 
                 IsBodyHtml = true,
                 Subject = "IUsta Email confirmation",
-                Body = @$"<!DOCTYPE html>
+                Body =@$"<!DOCTYPE html>
 <html lang=""en"">
 <head>
     <meta charset=""UTF-8"">
@@ -85,7 +85,7 @@ namespace IUstaApi.Mail
                 Credentials = new NetworkCredential(_config.Username, _config.Password)
             };
 
-            using var message = new MailMessage()
+            using var messageToCustomer = new MailMessage()
             {
 
                 IsBodyHtml = true,
@@ -135,18 +135,77 @@ namespace IUstaApi.Mail
             <p>We are pleased to inform you that your request has been accepted at {DateTime.Now} time.</p>
             <p>Thank you for choosing our services. If you have any questions or need further assistance, please don't hesitate to contact us.</p>
             <p>Best regards,</p>
-            <p>Your Company Name</p>
+            <p>© {DateTime.Now.Year} IUsta. All rights reserved</p>
         </div>
     </div>
 </body>
 </html>"
             };
 
-            message.From = new MailAddress(_config.Username);
-            message.To.Add(new MailAddress(workerEmail));
-            message.To.Add(new MailAddress(clientEmail));
+            using var messageToworker = new MailMessage()
+            {
 
-            smtp.Send(message);
+                IsBodyHtml = true,
+                Subject = "IUsta Request Acceptance",
+                Body = $@"<!DOCTYPE html>
+<html lang=""en"">
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <title>Request Accepted</title>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }}
+        .container {{
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }}
+        .header {{
+            background-color: #ff0000;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }}
+        .message {{
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }}
+        p {{
+            margin: 0;
+        }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>Request Accepted</h1>
+        </div>
+        <div class=""message"">
+            <p>Dear Worker,</p>
+            <p>We are pleased to inform you that your request has been accepted at {DateTime.Now} time.</p>
+            <p>If you have any questions or need further assistance, please don't hesitate to contact us.</p>
+            <p>Best regards,</p>
+            <p>© {DateTime.Now.Year} IUsta. All rights reserved</p>
+        </div>
+    </div>
+</body>
+</html>"
+            };
+            messageToCustomer.From = new MailAddress(_config.Username);
+            messageToCustomer.To.Add(new MailAddress(clientEmail));
+
+            messageToworker.From = new MailAddress(_config.Username);
+            messageToworker.To.Add(new MailAddress(workerEmail));
+
+            smtp.Send(messageToCustomer);
+            smtp.Send(messageToworker);
         }
     }
 }

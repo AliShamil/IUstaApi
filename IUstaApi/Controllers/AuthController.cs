@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
+using IUstaApi.Mail;
+
 namespace IUstaApi.Controllers
 {
     [Route("api/[controller]")]
@@ -16,13 +18,16 @@ namespace IUstaApi.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IJwtService _jwtService;
-
-        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IJwtService jwtService, RoleManager<IdentityRole> roleManager)
+        private readonly IMailService _mailService;
+        private readonly ILogger<WeatherForecastController> _logger;
+        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IJwtService jwtService, RoleManager<IdentityRole> roleManager, IMailService mailService, ILogger<WeatherForecastController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtService = jwtService;
             _roleManager=roleManager;
+            _mailService=mailService;
+            _logger=logger;
         }
 
         private async Task<AuthTokenDto> GenerateToken(AppUser user)
@@ -56,24 +61,52 @@ namespace IUstaApi.Controllers
                 UserName = request.Email,
                 Email = request.Email,
             };
+            var role = request.Role.Trim().ToLower();
+
+            if (role=="admin")
+            {
+                return BadRequest("You cannot register as admin!Pls select another roles");
+            }
+            
+            if (!await _roleManager.RoleExistsAsync(role))
+            {
+                    return NotFound("Role not found!"); ;
+            }
+
             var result = await _userManager.CreateAsync(user, request.Password);
 
 
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
-            var role = request.Role.Trim().ToLower();
-
-            if (!await _roleManager.RoleExistsAsync(role))
+            try
             {
-                if (!result.Succeeded) throw new Exception(result.Errors.First().Description);
-            }
 
+                var confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var url = Url.Action(nameof(ConfirmEmail), "Auth", new { email = user.Email, token = confirmToken }, Request.Scheme);
+                if (url is not null)
+                    _mailService.SendConfirmationMessage(user.Email, url);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             await _userManager.AddToRoleAsync(user, role);
 
             return Ok();
         }
-        
+        [HttpGet]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public async Task<ActionResult> ConfirmEmail(string email, string token)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is not null)
+            {
+                var result = await _userManager.ConfirmEmailAsync(user, token);
+                return Ok();
+            }
+            return BadRequest();
+        }
         [HttpGet("GetRoles")]
         public IActionResult GetRoles()
         {
@@ -89,13 +122,16 @@ namespace IUstaApi.Controllers
             {
                 return BadRequest();
             }
+            if (await _userManager.IsEmailConfirmedAsync(user))
+            {
+                var canSignIn = await _signInManager.PasswordSignInAsync(user, request.Password, request.RememberMe, false);
 
-            var canSignIn = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+                if (!canSignIn.Succeeded)
+                    return BadRequest();
 
-            if (!canSignIn.Succeeded)
-                return BadRequest();
-
-            return await GenerateToken(user);
+                return await GenerateToken(user);
+            }
+            return Unauthorized();
         }
 
         [HttpPost("refresh")]

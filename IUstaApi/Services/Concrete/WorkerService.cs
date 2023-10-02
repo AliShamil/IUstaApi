@@ -80,10 +80,10 @@ namespace IUstaApi.Services.Concrete
         {
             try
             {
-                var worker = await _userManager.FindByEmailAsync(request.WorkerEmail);
+                var worker = await _userManager.FindByIdAsync(_provider.GetUserInfo().id);
                 if (worker is not null)
                 {
-                    var workRequest = await _context.WorkRequests.FirstOrDefaultAsync(wr=> wr.Id == Guid.Parse(request.TaskId));
+                    var workRequest = await _context.WorkRequests.FirstOrDefaultAsync(wr => wr.Id == Guid.Parse(request.TaskId));
                     if (workRequest is null || workRequest.WorkerEmail != worker.Email)
                         return false;
 
@@ -101,11 +101,11 @@ namespace IUstaApi.Services.Concrete
             }
         }
 
-        public async Task<ProfileDto?> GetWorkerProfile(string email)
+        public async Task<ProfileDto?> GetWorkerProfile()
         {
             try
             {
-                var worker = await _userManager.FindByEmailAsync(email);
+                var worker = await _userManager.FindByIdAsync(_provider.GetUserInfo().id);
                 if (worker is not null)
                 {
                     var requests = _context.WorkRequests.Where(r => r.WorkerEmail == worker.Email).ToList();
@@ -141,10 +141,10 @@ namespace IUstaApi.Services.Concrete
 
         public async Task<bool> RejectWorkAsync(RejectWorkRequest request)
         {
-            var worker = await _userManager.FindByEmailAsync(request.WorkerEmail);
+            var worker = await _userManager.FindByIdAsync(_provider.GetUserInfo().id);
             if (worker is not null)
             {
-                var workRequest = await _context.WorkRequests.FirstOrDefaultAsync(wr=> wr.Id == Guid.Parse(request.TaskId));
+                var workRequest = await _context.WorkRequests.FirstOrDefaultAsync(wr => wr.Id == Guid.Parse(request.TaskId));
                 if (workRequest is null || workRequest.WorkerEmail != worker.Email)
                     return false;
 
@@ -156,35 +156,38 @@ namespace IUstaApi.Services.Concrete
             return false;
         }
 
-        public IEnumerable<RequestDto> SeeActiveRequests(string email)
-                    => _context.WorkRequests
-                    .Where(r => r.WorkerEmail == email && r.IsAccepted.HasValue && r.IsAccepted.Value)
-                    .Select(r => new RequestDto { Id = r.Id.ToString(), Message = r.Message, UserMail = r.ClientEmail });
+        public IEnumerable<RequestDto> SeeActiveRequests()
+        {
+            var worker = _userManager.FindByIdAsync(_provider.GetUserInfo().id).Result;
 
-        public IEnumerable<RequestDto> SeeCompletedTasks(string email)
-             => _context.WorkRequests
-                 .Where(r => r.WorkerEmail == email || r.IsCompleted)
+            return _context.WorkRequests
+                        .Where(r => r.WorkerEmail == worker.Email && r.IsAccepted.HasValue && r.IsAccepted.Value)
+                        .Select(r => new RequestDto { Id = r.Id.ToString(), Message = r.Message, UserMail = r.ClientEmail });
+        }
+
+        public IEnumerable<RequestDto> SeeCompletedTasks()
+        {
+            var worker = _userManager.FindByIdAsync(_provider.GetUserInfo().id).Result;
+            return _context.WorkRequests
+                 .Where(r => r.WorkerEmail == worker.Email && r.IsCompleted)
                  .Select(r => new RequestDto { Id = r.Id.ToString(), Message = r.Message, UserMail = r.ClientEmail });
+        }
 
-        public IEnumerable<RequestDto> SeeInactiveRequests(string email)
-            => _context.WorkRequests
-                .Where(r => r.WorkerEmail == email && !r.IsAccepted.HasValue)
+        public IEnumerable<RequestDto> SeeInactiveRequests()
+        {
+            var worker = _userManager.FindByIdAsync(_provider.GetUserInfo().id).Result;
+
+            return _context.WorkRequests
+                .Where(r => r.WorkerEmail == worker.Email && !r.IsAccepted.HasValue)
                 .Select(r => new RequestDto { Id = r.Id.ToString(), Message = r.Message, UserMail = r.ClientEmail });
+        }
 
         public async Task<bool> SetWorkDoneAsync(SetWorkDoneRequest request)
         {
-            try
-            {
-
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-            var worker = await _userManager.FindByEmailAsync(request.WorkerEmail);
+            var worker = await _userManager.FindByIdAsync(_provider.GetUserInfo().id);
             if (worker is not null)
             {
-                var workRequest = await _context.WorkRequests.FirstOrDefaultAsync(wr=>wr.Id == Guid.Parse(request.TaskId));
+                var workRequest = await _context.WorkRequests.FirstOrDefaultAsync(wr => wr.Id == Guid.Parse(request.TaskId));
                 if (workRequest is null || workRequest.WorkerEmail != worker.Email || !workRequest.IsAccepted.Value)
                     return false;
 

@@ -4,6 +4,7 @@ using IUstaApi.Models.DTOs;
 using IUstaApi.Models.DTOs.Category;
 using IUstaApi.Models.DTOs.Customer;
 using IUstaApi.Models.Entities;
+using IUstaApi.Providers;
 using IUstaApi.Services.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,14 @@ namespace IUstaApi.Services.Concrete
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly UstaDbContext _context;
+        private readonly IRequestUserProvider _provider;
 
-        public CustomerService(UserManager<AppUser> userManager, UstaDbContext context)
+
+        public CustomerService(UserManager<AppUser> userManager, UstaDbContext context, IRequestUserProvider provider)
         {
             _userManager=userManager;
             _context=context;
+            _provider=provider;
         }
 
         public async Task<IEnumerable<WorkerDto>> GetAllWorkersAsync()
@@ -57,10 +61,11 @@ namespace IUstaApi.Services.Concrete
             return 0;
         }
 
-        public IEnumerable<CustomerRequestDto> GetUsersRequests(string userEmail)
+        public IEnumerable<CustomerRequestDto> GetUsersRequests()
         {
+            var client = _userManager.FindByIdAsync(_provider.GetUserInfo().id).Result;
             return _context.WorkRequests
-                .Where(wr => wr.ClientEmail == userEmail)
+                .Where(wr => wr.ClientEmail == client.Email)
                 .Select(wr => new CustomerRequestDto
                 {
                     Id = wr.Id.ToString(),
@@ -94,7 +99,7 @@ namespace IUstaApi.Services.Concrete
         {
             try
             {
-                var client = await _userManager.FindByEmailAsync(request.UserEmail);
+                var client =await _userManager.FindByIdAsync(_provider.GetUserInfo().id);
                 var worker = await _userManager.FindByEmailAsync(request.WorkerEmail);
 
                 if (client is null || worker is null)

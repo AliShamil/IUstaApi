@@ -37,18 +37,18 @@ namespace IUstaApi.Controllers
 
 
         [HttpGet("profile")]
-        public async Task<ActionResult<ProfileDto>> GetProfile(string email) => Ok(await _service.GetWorkerProfile(email));
+        public async Task<ActionResult<ProfileDto>> GetProfile() => Ok(await _service.GetWorkerProfile());
 
         [HttpGet("seeActiveRequests")]
-        public ActionResult<IEnumerable<RequestDto>> GetActiveReuests(string email) => Ok(_service.SeeActiveRequests(email));
+        public ActionResult<IEnumerable<RequestDto>> GetActiveRequests() => Ok(_service.SeeActiveRequests());
 
         [HttpGet("seeInactiveRequests")]
 
-        public ActionResult<IEnumerable<RequestDto>> GetInactiveReuests(string email) => Ok(_service.SeeInactiveRequests(email));
+        public ActionResult<IEnumerable<RequestDto>> GetInactiveRequests() => Ok(_service.SeeInactiveRequests());
 
         [HttpGet("seeCompletedRequests")]
 
-        public ActionResult<IEnumerable<RequestDto>> GetCompletedReuests(string email) => Ok(_service.SeeCompletedTasks(email));
+        public ActionResult<IEnumerable<RequestDto>> GetCompletedRequests() => Ok(_service.SeeCompletedTasks());
 
         [HttpPost("completeTask")]
 

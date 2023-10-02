@@ -10,7 +10,7 @@ namespace IUstaApi.Services.Interface
         Task<IEnumerable<WorkerDto>> GetWorkersByRatingAsync(bool desc = true);
         IEnumerable<WorkerDto> GetWorkersByCategory(string categoryId);
         IEnumerable<CategoryInfoDto> SeeAllCategories();
-        IEnumerable<CustomerRequestDto> GetUsersRequests(string userEmail);
+        IEnumerable<CustomerRequestDto> GetUsersRequests();
         Task<bool> RateWorkDoneAsync(RateWorkDto model);
         Task<bool> SendWorkRequest(WorkRequestDto request);
     }

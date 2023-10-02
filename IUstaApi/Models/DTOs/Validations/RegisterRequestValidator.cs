@@ -21,7 +21,7 @@ namespace IUstaApi.Models.DTOs.Validations
         {
             RuleFor(e => e.Email).EmailAddress().NotEmpty();
             RuleFor(e => e.Password).Must(SharedValidator.BeValidPassword).NotEmpty();
-            RuleFor(e => e.Role).NotEmpty();
+            RuleFor(e => e.Role).NotNull().NotEmpty();
         }
     }
 }

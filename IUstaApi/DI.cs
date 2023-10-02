@@ -61,9 +61,8 @@ public static class DI
 
     public static IServiceCollection AddAuthenticationAndAuthorization(this IServiceCollection services, IConfiguration configuration)
     {
-        //services.AddScoped<IRequestUserProvider, RequestUserProvider>();
 
-        services.AddIdentity<AppUser, IdentityRole>(setup => { }).AddEntityFrameworkStores<UstaDbContext>();
+        services.AddIdentity<AppUser, IdentityRole>(setup => { }).AddEntityFrameworkStores<UstaDbContext>().AddDefaultTokenProviders();
 
         services.AddScoped<IJwtService, JwtService>();
 
@@ -159,15 +158,15 @@ public static class DI
         services.AddSingleton(smtpConfig);
         return services;
     }
-        //public static IServiceCollection AddLoggingPath(this IServiceCollection services, IConfiguration configuration)
-        //{
-        //    var directoryInfo = new DirectoryInfo("logs");
-        //    var fullpath = directoryInfo.FullName;
-        //    string logFileName = "log.txt";
-        //    string logFilePath = Path.Combine(fullpath, logFileName);
+    public static IServiceCollection AddLoggingPath(this IServiceCollection services, IConfiguration configuration)
+    {
+        var directoryInfo = new DirectoryInfo("logs");
+        var fullpath = directoryInfo.FullName;
+        string logFileName = "log.txt";
+        string logFilePath = Path.Combine(fullpath, logFileName);
 
-        //    configuration["Serilog:WriteTo:1:Args:path"] = logFilePath;
+        configuration["Serilog:WriteTo:1:Args:path"] = logFilePath;
 
-        //    return services;
-        //}
+        return services;
     }
+}

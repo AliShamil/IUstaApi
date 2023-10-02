@@ -15,10 +15,9 @@ builder.Services.AddControllers();
 builder.Services.AddDomainServices();
 builder.Services.AddEmailService(builder.Configuration);
 
-//loglamada bax
-//builder.Services.AddLoggingPath(builder.Configuration);
+builder.Services.AddLoggingPath(builder.Configuration);
 
-//builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
+builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddHttpContextAccessor();
 

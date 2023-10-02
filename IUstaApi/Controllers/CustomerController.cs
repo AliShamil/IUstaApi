@@ -36,7 +36,7 @@ public class CustomerController : ControllerBase
     public ActionResult<IEnumerable<WorkerDto>> GetWorkersByCategory(string categoryId) => Ok(_service.GetWorkersByCategory(categoryId));
 
     [HttpGet("seeMyRequests")]
-    public ActionResult<CustomerRequestDto> GetAllRequests(string userEmail) => Ok(_service.GetUsersRequests(userEmail));
+    public ActionResult<CustomerRequestDto> GetAllRequests() => Ok(_service.GetUsersRequests());
 
     [HttpPost("rateWork")]
     public async Task<ActionResult<bool>> RateWork([FromBody] RateWorkDto model)
