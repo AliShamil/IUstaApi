@@ -58,6 +58,23 @@ namespace IUstaApi.Services.Concrete
             };
         }
 
+        public async Task<bool> RemoveCategoryAsync(string categoryId)
+        {
+            try
+            {
+                var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id==Guid.Parse(categoryId));
+                _context.Categories.Remove(category);
+                
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         public async Task<bool> UpdateCategoryAsync(CategoryUpdateDto model)
         {
             try

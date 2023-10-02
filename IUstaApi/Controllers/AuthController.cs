@@ -38,7 +38,6 @@ namespace IUstaApi.Controllers
             user.TokenExpires = refreshToken.Expires;
             user.TokenCreated = refreshToken.Created;
             await _userManager.UpdateAsync(user);
-
             return new AuthTokenDto
             {
                 AccessToken = accessToken,

@@ -22,6 +22,9 @@ namespace IUstaApi.Controllers
 
         [HttpPost("addCategory")]
         public async Task<ActionResult<bool>> AddCategory([FromBody] CategoryDto model) => await _service.AddCategoryAsync(model);
+        
+        [HttpDelete("removeCategory")]
+        public async Task<ActionResult<bool>> RemoveCategory([FromBody] string categoryId) => await _service.RemoveCategoryAsync(categoryId);
 
 
         [HttpGet("showAllCategories")]
