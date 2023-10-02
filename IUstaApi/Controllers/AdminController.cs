@@ -83,9 +83,31 @@ namespace IUstaApi.Controllers
         [HttpGet("showAllCategories")]
         public ActionResult<IEnumerable<CategoryInfoDto>> GetAllCategories() => Ok(_service.GetAllCategories());
 
-        [HttpGet("showAllUsers")]
-        public ActionResult<IEnumerable<AppUserInfo>> GetAllUsers() => Ok(_service.GetAllUsers().Result);
+        //[HttpGet("showAllUsers")]
+        //public ActionResult<IEnumerable<AppUserInfo>> GetAllUsers() => Ok(_service.GetAllUsers().Result);
 
+        [HttpGet("showAllUsers")]
+        public ActionResult<IEnumerable<AppUserInfo>> GetAllUsers()
+        {
+            // Check if the data is available in the cache
+            if (_memoryCache.TryGetValue("AllUsers", out IEnumerable<AppUserInfo> cachedUsers))
+            {
+                return Ok(cachedUsers);
+            }
+
+            // Data was not found in the cache, fetch and cache the data
+            var users = _service.GetAllUsers().Result;
+
+            // Cache the data with a specified cache expiration time
+            var cacheEntryOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) // Adjust the expiration time as needed
+            };
+
+            _memoryCache.Set("AllUsers", users, cacheEntryOptions);
+
+            return Ok(users);
+        }
 
         [HttpPut("updateCategory")]
         public async Task<ActionResult<bool>> UpdateCategory([FromBody] CategoryUpdateDto model) => await _service.UpdateCategoryAsync(model);
